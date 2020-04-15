@@ -1,4 +1,6 @@
-# starborne_automaton_workers
+# starborne_automaton_workers  
+
+map_scanner.py is the actual map scanner.  
 
 dependencies:  
 -pyautogui https://pypi.org/project/PyAutoGUI/  
