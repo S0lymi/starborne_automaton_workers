@@ -23,7 +23,7 @@ while True:
       print(pytesseract.image_to_string('tesseract_test.png', timeout=2))
       break
     except:
-      print("Tesseract probably not in PATH, write path to .exe below (Hint: It's probably C:\Program Files\Tesseract-OCR\tesseract.exe)")
+      print("Tesseract probably not in PATH, write path to .exe below (Hint: It's probably C:\Program Files\Tesseract-OCR\\tesseract.exe)")
       tesspath = input('Tesseract path:')
       pytesseract.pytesseract.tesseract_cmd = tesspath
 #pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
@@ -67,7 +67,7 @@ def traverse_hexes(x = 0, y = 0, radius = 500):
     return traverse_list
 
 
-
+#to parse text of hexes
 cellnamelist = ["Terrestrial Planet","Grand Terrestrial Planet",
                 "Desert Planet","Grand Desert Planet",
                 "Ocean Planet","Grand Ocean Planet",
@@ -93,20 +93,10 @@ cellnamelist = ["Terrestrial Planet","Grand Terrestrial Planet",
                 "Mysterious Mechanism","Enigmatic Mechanism","Broken Planet",
                 "Vortex","Debris","Large Debris",""]
     
-"""
-#load images into list
-topimlist = []
-numberimlist = []
-bottomimlist = []
-
-for i in range(10):
-    imload = Image.open('res/'+repr(i)+'.png')
-    numberimlist.append(imload)
-"""
 
 time.sleep(wait_durations[0])
 
-#get in position (doesnt work for some reason)
+#get in position ( dragdoesnt work for some reason)
 """
 screenWidth, screenHeight = pyautogui.size()
 pyautogui.moveTo(screenWidth/2, screenHeight/2+100, 2)
@@ -123,6 +113,7 @@ preloaded = False #To keep track of preloaded hexes
 coordlist = traverse_hexes(int(middlecoords[0]),int(middlecoords[1]),int(scanradius))
 random.Random(42).shuffle(coordlist) #so checking with strdist can make sense later
 for index_num in range(resume_index,len(coordlist)):
+    readlocation = 677,131
     coords = coordlist[index_num]
     failcounter = 0
     while True: #try until coordinate is successfully read(passes end check)
@@ -140,26 +131,31 @@ for index_num in range(resume_index,len(coordlist)):
             yborder = 0
             readlocation=pyautogui.position()
             im = pyautogui.screenshot(region=(readlocation[0]+25,readlocation[1]+25, readwindow[0], readwindow[1]))
-            for x in range(im.size[0]):
-                if im.getpixel((x,0)) == bordercolor:
-                    borderfound = True
-                    for y in range(20):
-                        borderfound = borderfound and im.getpixel((x,y)) == bordercolor
-                    if borderfound == True:
-                        xborder = x
-                        break
-                    
-            for y in range(im.size[1]):
-                if im.getpixel((0,y)) == bordercolor:
-                    borderfound = True
-                    for x in range(20):
-                        borderfound = borderfound and im.getpixel((x,y)) == bordercolor
-                    if borderfound == True:
-                        yborder = y
-                        break
+            for xy in range(im.size[1]-11):
+                if xborder !=0:
+                    break
+                for x in range(im.size[0]):
+                    if im.getpixel((x,xy)) == bordercolor:
+                        borderfound = True
+                        for y in range(11):
+                            borderfound = borderfound and im.getpixel((x,y+xy)) == bordercolor
+                        if borderfound == True:
+                            xborder = x
+                            break
+            for yx in range(im.size[0]):
+                if yborder != 0:
+                    break
+                for y in range(im.size[1]-10):
+                    if im.getpixel((yx,y)) == bordercolor:
+                        borderfound = True
+                        for x in range(10):
+                            borderfound = borderfound and im.getpixel((x+yx,y)) == bordercolor
+                        if borderfound == True:
+                            yborder = y
+                            break
             
             #print(xborder,yborder)
-            if xborder == 0:
+            if xborder == 0 or yborder == 0:
                 time.sleep(wait_durations[2])
             else:
                 break
@@ -169,6 +165,7 @@ for index_num in range(resume_index,len(coordlist)):
             nextcoords= coordlist[index_num+1]
             pyautogui.click(x=45, y=1042, button='left')
             pyautogui.typewrite('/goto ' + repr(nextcoords[0])+' '+ repr(nextcoords[1]) + '\n', interval=wait_durations[3])
+            readlocation = 677,131
             pyautogui.moveTo(readlocation, duration=wait_durations[2])
             preloaded = True
             
@@ -178,14 +175,15 @@ for index_num in range(resume_index,len(coordlist)):
         imbottom = im.crop((0, yborder-35, xborder- 3, yborder-10))
         
         #poke the neural net with a slightly different image if it gets stuck (actually seems better as default too)
-        if failcounter < 2:
+        if failcounter < 4:
             imbottom.paste(imbottom.crop((6,0,10,imbottom.size[1])),(11,0))
             #imbottom.show()
         
         deviant=False
         #get strings from image
         topstr=pytesseract.image_to_string(ImageOps.invert(imtop)) #invert need for tesseract to work properly
-        bottomstr=pytesseract.image_to_string(ImageOps.invert(imbottom))
+        bottomstr=pytesseract.image_to_string(ImageOps.invert(imbottom)) #,config='outputbase digits')
+        #pytesseract.image_to_string(someimage, config='outputbase digits')
         
         print('top:'+topstr)
         print('bottom:'+bottomstr)
@@ -200,9 +198,8 @@ for index_num in range(resume_index,len(coordlist)):
         distances=[]
         for cellname in cellnamelist:
             distances.append(strdist(namestr,cellname))
-        if min(distances) < 2:
-            namestr=cellnamelist[distances.index(min(distances))]
-        else:
+        namestr=cellnamelist[distances.index(min(distances))]
+        if min(distances) > 1:
             deviant = True
             
         #parse owner and claim
@@ -221,14 +218,6 @@ for index_num in range(resume_index,len(coordlist)):
         print('parsed: '+coordsstr+','+namestr+','+claimstr+','+ownerstr)
         print('checkcoords:'+ str(coords[0])+','+str(coords[1]))
         
-        #im.show()
-        #imtop.show()
-        #ImageOps.invert(imtop).show()
-        #imbottom.show()
-        #ImageOps.invert(imbottom).show()
-        #print('top: '+topstr)
-        #print('bottom: '+bottomstr)
-        #print(strdist(coordsstr,str(coords[0])+','+str(coords[1])))
         
         if strdist(coordsstr,str(coords[0])+','+str(coords[1])) < 2:
             if strdist(coordsstr,str(coords[0])+','+str(coords[1])) > 0:
@@ -245,8 +234,11 @@ for index_num in range(resume_index,len(coordlist)):
             print('corrected: '+ str(coords[0])+','+str(coords[1])+','+namestr+','+claimstr+','+ownerstr+'\n')
             print('PASS ('+str(index_num+1)+' of '+str(len(coordlist))+')\n')
             break
+        #try a slightly different parsing method too (only for the bottom image)
+        print("name: "+namestr)
+            
+        
         print('CHECK FAIL: '+'checkcoords:'+ str(coords[0])+','+str(coords[1]))
-        failcounter = failcounter+1
         preloaded = False #reload advised
         if failcounter > 5:
             #save an image
@@ -259,7 +251,7 @@ for index_num in range(resume_index,len(coordlist)):
             saveim.save('deviants/!manual_'+str(coords[0])+'_'+str(coords[1])+'_'+namestr+'.png')
             ownerstr = ownerstr + ', MANUAL_LABOR'
             break
-            
+        failcounter = failcounter+1
     
     f = open("map.txt", "a")
     f.write(str(coords[0])+','+str(coords[1])+','+namestr+','+claimstr+','+ownerstr+'\n')
