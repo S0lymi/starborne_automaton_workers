@@ -126,11 +126,16 @@ for index_num in range(resume_index,len(coordlist)):
         
         
         time.sleep(wait_durations[1])
+        
+        popup_read_fail = 0
         while True: #wait for orange to pop up if needed
             xborder= 0
             yborder = 0
             readlocation=pyautogui.position()
             im = pyautogui.screenshot(region=(readlocation[0]+25,readlocation[1]+25, readwindow[0], readwindow[1]))
+            if popup_read_fail > 30: # if at least 1.5s passed randomly move mouse to combat starborne's graphical bugs
+                pyautogui.moveTo((readlocation[0] + random.randrange(-20,20,1),readlocation[1] + random.randrange(-20,20,1)), duration=wait_durations[2]+0.05)
+            
             for xy in range(im.size[1]-11):
                 if xborder !=0:
                     break
@@ -156,11 +161,12 @@ for index_num in range(resume_index,len(coordlist)):
             
             #print(xborder,yborder)
             if xborder == 0 or yborder == 0:
-                time.sleep(wait_durations[2])
+                time.sleep(0.05)
+                popup_read_fail = popup_read_fail + 1
             else:
                 break
             
-        #maybe speedud if we go to next coordinate while processing image?
+        #maybe speedup if we go to next coordinate while processing image?
         if index_num+1 < len(coordlist):
             nextcoords= coordlist[index_num+1]
             pyautogui.click(x=45, y=1042, button='left')
@@ -234,8 +240,6 @@ for index_num in range(resume_index,len(coordlist)):
             print('corrected: '+ str(coords[0])+','+str(coords[1])+','+namestr+','+claimstr+','+ownerstr+'\n')
             print('PASS ('+str(index_num+1)+' of '+str(len(coordlist))+')\n')
             break
-        #try a slightly different parsing method too (only for the bottom image)
-        print("name: "+namestr)
             
         
         print('CHECK FAIL: '+'checkcoords:'+ str(coords[0])+','+str(coords[1]))
