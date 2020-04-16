@@ -19,5 +19,7 @@ Parameters:
  - deviants: Option to save picture of cases where the match wasn't exact. Pics are save with the nam x_y.png  
  When recognition falls below a crtain threshold files with names starting !manual keywords are created indicating that confidence in these cases are low and should be looked at manually if possible.  
  
+Map is created as map.txt, output format is: x,y,name,claimstrength,owner
+ 
  ### Needed camera options
  When going back to game set the camera to vertically look down (perpendicular to that map plane), and zoom in as much as possible. This way when jumping with /goto-s the mouse is always in the correct hex.
