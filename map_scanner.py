@@ -43,6 +43,7 @@ resume_index = int(input("Start index:" ))
 savedeviants = bool(int(input("Save pics of all the deviant ones? (0 or 1 ): ")))
 print('ALT+TAB and HANDS UP')
 
+start_time = time.time()
 
 readlocation = 677,131
 readwindow = 500, 550
@@ -225,7 +226,7 @@ for index_num in range(resume_index,len(coordlist)):
         print('checkcoords:'+ str(coords[0])+','+str(coords[1]))
         
         
-        if strdist(coordsstr,str(coords[0])+','+str(coords[1])) < 2:
+        if strdist(coordsstr,str(coords[0])+','+str(coords[1])) < 3:
             if strdist(coordsstr,str(coords[0])+','+str(coords[1])) > 0:
                 deviant=True
             if deviant and savedeviants:
@@ -241,6 +242,8 @@ for index_num in range(resume_index,len(coordlist)):
             print('PASS ('+str(index_num+1)+' of '+str(len(coordlist))+')\n')
             break
             
+        if xborder < 90 or yborder < 50: #these hexes are empty, not enough text on them, so we don't care to try scannin again
+            break
         
         print('CHECK FAIL: '+'checkcoords:'+ str(coords[0])+','+str(coords[1]))
         preloaded = False #reload advised
@@ -256,10 +259,15 @@ for index_num in range(resume_index,len(coordlist)):
             ownerstr = ownerstr + ', MANUAL_LABOR'
             break
         failcounter = failcounter+1
+        
     
     f = open("map.txt", "a")
     f.write(str(coords[0])+','+str(coords[1])+','+namestr+','+claimstr+','+ownerstr+'\n')
     f.close()
     
-    
+print("\nDone")
+comp_time = time.time()-start_time
+print("Time elapsed: "+str(comp_time))
+
+print("Avg time/hex: "+str(comp_time/(len(coordlist)-resume_index)))
 
