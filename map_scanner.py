@@ -7,7 +7,7 @@ Created on Tue Apr 14 16:26:17 2020
 
 import pyautogui
 import time
-from PIL import ImageOps, Image, ImageDraw
+from PIL import ImageOps, Image, ImageDraw, ImageFont
 import pytesseract
 from Levenshtein import distance as strdist
 import random
@@ -41,9 +41,12 @@ middlecoords = scaninput[0:2]
 scanradius = scaninput[2]
 resume_index = int(input("Start index:" ))
 savedeviants = bool(int(input("Save pics of all the deviant ones? (0 or 1 ): ")))
+shuffleoff = bool(int(input("shufflemode off? (0 or 1 ): ")))
 print('ALT+TAB and HANDS UP')
 
 start_time = time.time()
+
+unicode_font = ImageFont.truetype("DejaVuSans.ttf", 10)
 
 readlocation = 677,131
 readwindow = 500, 550
@@ -112,11 +115,14 @@ pyautogui.scroll(10)
 #print(currentMouseX,currentMouseY)
 preloaded = False #To keep track of preloaded hexes
 coordlist = traverse_hexes(int(middlecoords[0]),int(middlecoords[1]),int(scanradius))
-random.Random(42).shuffle(coordlist) #so checking with strdist can make sense later
+if not shuffleoff:
+    random.Random(42).shuffle(coordlist) #so checking with strdist can make sense later
 for index_num in range(resume_index,len(coordlist)):
     readlocation = 677,131
     coords = coordlist[index_num]
     failcounter = 0
+    yminpass = 11
+    xminpass = 10
     while True: #try until coordinate is successfully read(passes end check)
         if not preloaded:
             pyautogui.click(x=45, y=1042, button='left')
@@ -129,6 +135,11 @@ for index_num in range(resume_index,len(coordlist)):
         time.sleep(wait_durations[1])
         
         popup_read_fail = 0
+        time.sleep(0.1) #safeguard againts /goto crosstalk
+        if failcounter > 4:
+            time .sleep(1) #additional safeguard when hard to parse
+            xminpass = 35 #not to find station lvl number as border
+            
         while True: #wait for orange to pop up if needed
             xborder= 0
             yborder = 0
@@ -143,7 +154,7 @@ for index_num in range(resume_index,len(coordlist)):
                 for x in range(im.size[0]):
                     if im.getpixel((x,xy)) == bordercolor:
                         borderfound = True
-                        for y in range(11):
+                        for y in range(yminpass):
                             borderfound = borderfound and im.getpixel((x,y+xy)) == bordercolor
                         if borderfound == True:
                             xborder = x
@@ -154,7 +165,7 @@ for index_num in range(resume_index,len(coordlist)):
                 for y in range(im.size[1]-10):
                     if im.getpixel((yx,y)) == bordercolor:
                         borderfound = True
-                        for x in range(10):
+                        for x in range(xminpass):
                             borderfound = borderfound and im.getpixel((x+yx,y)) == bordercolor
                         if borderfound == True:
                             yborder = y
@@ -229,14 +240,14 @@ for index_num in range(resume_index,len(coordlist)):
         if strdist(coordsstr,str(coords[0])+','+str(coords[1])) < 3:
             if strdist(coordsstr,str(coords[0])+','+str(coords[1])) > 0:
                 deviant=True
+                ownerstr = ownerstr + ', deviant' + str(shuffleoff)
             if deviant and savedeviants:
-                ownerstr = ownerstr + ', deviant'
                 saveim = Image.new('RGB', (im.size[0], im.size[1]+imtop.size[1]+imbottom.size[1]+56))
                 saveim.paste(im,(0,0))
                 saveim.paste(ImageOps.invert(imtop),(0,im.size[1]))
                 saveim.paste(ImageOps.invert(imbottom),(0,im.size[1]+imtop.size[1]+1))
                 #The abomination
-                ImageDraw.Draw(saveim).text((0,im.size[1]+imtop.size[1]+1+imbottom.size[1]),"top:"+topstr+"\n"+"bottom:"+bottomstr+"\n"+"parsed: "+coordsstr+","+namestr+","+claimstr+","+ownerstr+"\n"+"corrected: "+ str(coords[0])+","+str(coords[1])+","+namestr+","+claimstr+","+ownerstr+"\n")
+                ImageDraw.Draw(saveim).text((0,im.size[1]+imtop.size[1]+1+imbottom.size[1]),"top:"+topstr+"\n"+"bottom:"+bottomstr+"\n"+"parsed: "+coordsstr+","+namestr+","+claimstr+","+ownerstr+"\n"+"corrected: "+ str(coords[0])+","+str(coords[1])+","+namestr+","+claimstr+","+ownerstr+"\n", font=unicode_font)
                 saveim.save('deviants/'+str(coords[0])+'_'+str(coords[1])+'_'+namestr+'.png')               
             print('corrected: '+ str(coords[0])+','+str(coords[1])+','+namestr+','+claimstr+','+ownerstr+'\n')
             print('PASS ('+str(index_num+1)+' of '+str(len(coordlist))+')\n')
@@ -254,7 +265,7 @@ for index_num in range(resume_index,len(coordlist)):
             saveim.paste(ImageOps.invert(imtop),(0,im.size[1]))
             saveim.paste(ImageOps.invert(imbottom),(0,im.size[1]+imtop.size[1]+1))
             #The abomination again
-            ImageDraw.Draw(saveim).text((0,im.size[1]+imtop.size[1]+1+imbottom.size[1]),"top:"+topstr+"\n"+"bottom:"+bottomstr+"\n"+"parsed: "+coordsstr+","+namestr+","+claimstr+","+ownerstr+"\n"+"corrected: "+ str(coords[0])+","+str(coords[1])+","+namestr+","+claimstr+","+ownerstr+"\n")
+            ImageDraw.Draw(saveim).text((0,im.size[1]+imtop.size[1]+1+imbottom.size[1]),"top:"+topstr+"\n"+"bottom:"+bottomstr+"\n"+"parsed: "+coordsstr+","+namestr+","+claimstr+","+ownerstr+"\n"+"corrected: "+ str(coords[0])+","+str(coords[1])+","+namestr+","+claimstr+","+ownerstr+"\n",font=unicode_font)
             saveim.save('deviants/!manual_'+str(coords[0])+'_'+str(coords[1])+'_'+namestr+'.png')
             ownerstr = ownerstr + ', MANUAL_LABOR'
             break
