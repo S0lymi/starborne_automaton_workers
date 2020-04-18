@@ -30,7 +30,8 @@ Map is created as map.txt, output format is: x,y,name,claimstrength,owner
  This script can be used to merga maps from different scans. input format is: file1 file2 output_file
  
  ## Spot finder
- 
 Adequately modifying the notebook **spot_finder.ipynb** or the script **spotfind.py** can be used to search for spots.
+You can launch a binder to do this in browser also:  
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/S0lymi/starborne_automaton_workers/master?filepath=spot_finder.ipynb)
  
  
