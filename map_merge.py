@@ -19,7 +19,7 @@ print("read in")
 with open(mergeinput[1]) as file:
     for line in file:
         line = line.strip() #preprocess line
-        match = [storedlines.index(s) for s in storedlines if line in s]
+        match = [storedlines.index(s) for s in storedlines if line[0:line.find(',',line.find(',')+1)] in s]
         if len(match) > 0:
             linepriority = 0
             if "deviant" in line: linepriority = 1

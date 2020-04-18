@@ -136,9 +136,11 @@ for index_num in range(resume_index,len(coordlist)):
         
         popup_read_fail = 0
         time.sleep(0.1) #safeguard againts /goto crosstalk
-        if failcounter > 4:
+        if failcounter > 3:
             time .sleep(1) #additional safeguard when hard to parse
             xminpass = 35 #not to find station lvl number as border
+            if failcounter > 4:
+                time .sleep(3) #additional #safeguard againts /goto crosstalk on last attempt (misscan should be avoided at all cost)
             
         while True: #wait for orange to pop up if needed
             xborder= 0
