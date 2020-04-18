@@ -32,6 +32,6 @@ Map is created as map.txt, output format is: x,y,name,claimstrength,owner
  ## Spot finder
 Adequately modifying the notebook **spot_finder.ipynb** or the script **spotfind.py** can be used to search for spots.
 You can launch a binder to do this in browser also:  
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/S0lymi/starborne_automaton_workers/master?filepath=spot_finder.ipynb)
- 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/S0lymi/starborne_automaton_workers/master?filepath=spot_finder.ipynb)  
+ (sometimes it doesnt start properly (check build logs to see if it started working on it or not), might have to try a few times)
  
